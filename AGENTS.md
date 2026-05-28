@@ -15,9 +15,13 @@ This repo is a **template instance**. The user has cloned a generic
 for one specific endeavor — research project, business plan, technical
 investigation, life decision, etc. The specialization happens primarily
 through [`wiki/charter.md`](wiki/charter.md) (the user's *purpose* for
-this wiki) and, where applicable, a [`wiki/decisions/mission.md`](wiki/decisions/)
-page (the identity of the *subject* being analyzed). See §7 for how to
-help the user finish the specialization.
+this wiki). For the minority of endeavors where the *subject* can
+pivot independently of the purpose (typically ventures: a business, a
+product, a hypothesis-under-test), an optional
+[`wiki/decisions/mission.md`](wiki/decisions/) page additionally
+captures the subject's identity. See §7 for how to help the user
+finish the specialization, including the **pivot test** for whether
+mission is warranted.
 
 ---
 
@@ -29,11 +33,17 @@ editor; the user is the curator and decision-maker.
 
 The user's own purpose for this wiki — *why* the endeavor exists, what
 goal it serves, what's in and out of scope — lives in
-[`wiki/charter.md`](wiki/charter.md). Where the endeavor has a distinct
-*subject* (a business being analyzed, a product being designed, a
-hypothesis being tested), its identity belongs in
-`wiki/decisions/mission.md`. Read both before answering substantive
-`/query`s; they constrain what counts as a valid recommendation.
+[`wiki/charter.md`](wiki/charter.md). The charter is **always
+present**; most endeavors stop there. A second, **optional** page —
+[`wiki/decisions/mission.md`](wiki/decisions/) — captures the identity
+of the *subject* the endeavor is about, and is only warranted when
+subject and purpose have **different lifecycles** (i.e. the subject
+can pivot without the charter needing a rewrite). This is typical for
+ventures (a business being founded, a product being designed, a
+hypothesis being tested) and atypical for investigative endeavors
+(a research project, a literature review). See §7 for the pivot test.
+Read whichever exist before answering substantive `/query`s; they
+constrain what counts as a valid recommendation.
 
 The wiki is the compounding artifact of that work. Everything we learn
 about the topic — its landscape, its stakeholders, its components, its
@@ -214,9 +224,14 @@ keeps citations clickable.
 - **`type: meta`** — `index.md`, `log.md`, `charter.md`, `fundamentals.md`,
  anything operational.
 
-Decision pages are the **only** wiki pages allowed to exist without a
-`raw/` source. Their source of truth is the user's `/decide` action,
-captured inline in frontmatter and mirrored in `wiki/log.md`.
+Decision pages are the only **content** pages allowed to exist without
+a `raw/` source — their source of truth is the user's `/decide` action,
+captured inline in frontmatter and mirrored in `wiki/log.md`. Meta
+pages (`charter.md`, `index.md`, `log.md`, `fundamentals.md`,
+`open-questions.md`, `todos.md`) are exempt by being operational:
+`charter.md` is sourced from the charter dialog (§7); the rest are
+either derived (`open-questions`, `todos`) or scaffolding the agent
+keeps current.
 
 ---
 
@@ -607,12 +622,32 @@ substantive workflows until at least step 1 is done.
  `meta` entry in `wiki/log.md`.
 2. **Optionally fill in `wiki/decisions/mission.md` together.** Same
  collaborative flow as the charter (and structurally a `/decide`,
- since it lives in `decisions/`). Use this when the endeavor has a
- distinct *subject* whose identity needs its own anchor page — a
- business being founded, a product being designed, a hypothesis
- being tested. Skip it when the endeavor is purely investigative
- (a research project, a literature review) and the charter is
- enough.
+ since it lives in `decisions/`). **Mission is the exception, not
+ the rule** — most endeavors are charter-only. Default to skipping it
+ and only promote to a mission page once the subject's identity
+ starts accumulating its own decisions over time.
+
+ **The pivot test (when mission earns its keep):** imagine the user
+ changes their mind about a major attribute of the thing they're
+ working on. Does the charter need a rewrite, or just a `supersedes`
+ chain on the subject? If the latter, mission is justified; if the
+ former, the subject and purpose share a lifecycle and the charter
+ alone is enough.
+
+ Heuristic by endeavor type:
+
+   - **Ventures** (business being founded, product being designed,
+     hypothesis being tested) → mission usually earns its keep. A
+     pivot from e.g. "warehouse automation" to "construction-site
+     automation" doesn't change *why* the wiki exists, only *what*
+     the subject is.
+   - **Investigative endeavors** (research project, literature
+     review, decision-support exercise) → charter alone. The topic
+     *is* the subject; naming it twice adds nothing and an
+     investigation pivot usually is a charter rewrite.
+   - **Borderline** (career-change deliberation, long-form personal
+     decision) → default to charter-only; promote later if the
+     subject starts attracting its own `/decide`s.
 3. **Let pages grow organically.** Do **not** pre-create entity or
  concept pages just because they "might be useful". Empty
  placeholder pages are clutter. Each entity / concept page

@@ -86,10 +86,13 @@ index, empty log, empty content directories. To start using it:
    not, and what would cause you to revisit the charter? See
    `AGENTS.md` §7 for the exact contract.
 3. **Optionally fill in `wiki/decisions/mission.md` with the agent.**
-   Same collaborative flow as the charter. Use this when the endeavor
-   has a distinct *subject* whose identity needs its own anchor (a
-   business being founded, a product being designed, a hypothesis
-   being tested). Skip it for purely investigative projects.
+   Same collaborative flow as the charter. **Mission is the exception,
+   not the rule** — most endeavors are charter-only. Earn its keep
+   with the *pivot test*: could you change *what* you're working on
+   without changing *why* this wiki exists? Ventures (a business, a
+   product, a hypothesis-under-test) usually pass; investigative
+   endeavors (research, literature review) don't. See `AGENTS.md` §7
+   for details. When in doubt, skip it — you can always add it later.
 4. **Open this repo in Obsidian as a vault.** Open the *whole repo*
    (not just `wiki/`) so links from wiki pages into `raw/` resolve.
    See "Browsing in Obsidian" below.

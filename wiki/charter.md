@@ -43,10 +43,15 @@ indicators for civil unrest and produce one publishable synthesis."*]
 - [[index]] — catalog of what exists.
 - [[log]] — chronological record of what was done.
 - [[fundamentals]] — definitions of recurring terms (grow on-demand).
-- [[decisions/mission]] — *optional.* What the *subject* of the endeavor
-  is, when the endeavor has a distinct subject (a business, a product,
-  a hypothesis). Skip this for purely investigative projects. Charter =
-  purpose of the *endeavor*; mission = identity of the *subject*.
+- [[decisions/mission]] — *optional, and usually skipped.* Identity of
+  the *subject* of the endeavor. Only earns its keep when subject and
+  purpose have different lifecycles — i.e. you could pivot *what*
+  you're working on without changing *why* this wiki exists. Typical
+  for ventures (a business, a product, a hypothesis-under-test);
+  not for investigative projects (a research project, a literature
+  review). See [`AGENTS.md`](../AGENTS.md) §7 for the pivot test.
+  Charter = purpose of the *endeavor*; mission = identity of the
+  *subject*.
 
 ## Revisit triggers
 
