@@ -5,11 +5,16 @@ a persistent, citation-tracked knowledge base: business plans, research
 projects, technical investigations, life decisions, market analyses,
 literature reviews, etc.
 
-You clone this template, write a one-page [`wiki/charter.md`](wiki/charter.md)
-saying what *this* instance of the wiki is for, and from then on an LLM
-agent maintains the knowledge base for you — disciplined about citations,
-contradictions, and accumulated state — instead of re-deriving everything
-from raw documents on each query.
+You clone this template, sit down with the agent for one short session
+to fill in [`wiki/charter.md`](wiki/charter.md) (the agent asks, you
+answer, the agent drafts) saying what *this* instance of the wiki is
+for, and from then on the agent maintains the knowledge base for you —
+disciplined about citations, contradictions, and accumulated state —
+instead of re-deriving everything from raw documents on each query.
+
+Throughout, **you drive changes via chat, not by hand-editing wiki
+pages.** The agent's catalogs (`index.md`, `log.md`, `open-questions`,
+`todos`) only stay coherent if writes flow through the workflows below.
 
 This follows [Andrej Karpathy's LLM Wiki pattern][gist].
 
@@ -26,8 +31,8 @@ the start of every session.
 ├── AGENTS.md     ← the schema the agent follows (start here)
 ├── raw/          ← immutable source documents
 │   └── notes/    ← user-asserted facts via /note
-└── wiki/         ← LLM-owned, interlinked markdown
-    ├── charter.md ← purpose of this wiki (you write this)
+└── wiki/         ← agent-maintained, user-driven (edits via workflows, not by hand)
+    ├── charter.md ← purpose of this wiki (drafted with the agent)
     ├── index.md  ← content catalog
     ├── log.md    ← chronological history
     └── decisions/ ← user-set targets/decisions via /decide
@@ -37,9 +42,11 @@ the start of every session.
   never modifies it. Files arrive there in three ways: you drop them in,
   the agent fetches them via `/research`, or the agent writes user
   assertions there via `/note`.
-- `wiki/` is **agent-owned**. It compiles, cross-references, and
-  maintains the knowledge derived from `raw/`. You read it; the agent
-  writes it.
+- `wiki/` is **agent-maintained, user-driven**. The agent does the
+  writing — compiling, cross-referencing, and maintaining the knowledge
+  derived from `raw/` — but every change is initiated by you through a
+  workflow (or its natural-language equivalent). You read it; you don't
+  hand-edit it.
 - `AGENTS.md` is the **schema** — what makes the agent a disciplined wiki
   maintainer instead of a generic chatbot.
 
@@ -71,16 +78,18 @@ index, empty log, empty content directories. To start using it:
 1. **Skim [`AGENTS.md`](AGENTS.md)** so you know how the agent is
    supposed to behave. Push back if anything feels wrong; the schema
    is meant to co-evolve with you.
-2. **Write [`wiki/charter.md`](wiki/charter.md).** This is the *one*
-   piece of specialization that turns the template into your wiki.
+2. **Fill in [`wiki/charter.md`](wiki/charter.md) with the agent.**
+   This is the *one* piece of specialization that turns the template
+   into your wiki. The agent will ask a few targeted questions, draft
+   the page, and you confirm — same collaborative shape as `/decide`.
    It should answer: what is this wiki for? What's in scope, what's
    not, and what would cause you to revisit the charter? See
    `AGENTS.md` §7 for the exact contract.
-3. **Optionally write `wiki/decisions/mission.md`.** Use this when the
-   endeavor has a distinct *subject* whose identity needs its own
-   anchor (a business being founded, a product being designed, a
-   hypothesis being tested). Skip it for purely investigative
-   projects.
+3. **Optionally fill in `wiki/decisions/mission.md` with the agent.**
+   Same collaborative flow as the charter. Use this when the endeavor
+   has a distinct *subject* whose identity needs its own anchor (a
+   business being founded, a product being designed, a hypothesis
+   being tested). Skip it for purely investigative projects.
 4. **Open this repo in Obsidian as a vault.** Open the *whole repo*
    (not just `wiki/`) so links from wiki pages into `raw/` resolve.
    See "Browsing in Obsidian" below.

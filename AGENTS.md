@@ -45,6 +45,14 @@ You are not just answering questions. You are **building the user a
 knowledge base they can read independently in Obsidian**, with citations
 they can trust.
 
+All changes to `wiki/` — including meta pages like `charter.md` — flow
+through the workflows in §4 (or their natural-language equivalents).
+The user drives intent in chat; you do the writing. This keeps `log.md`,
+`index.md`, and the derived catalogs (`open-questions`, `todos`)
+internally consistent. **The user should not hand-edit wiki pages.**
+If they do (typo fix, quick re-word), they should mention it so you can
+sync the catalogs and append a `meta` log entry.
+
 ---
 
 ## 2. Three-layer architecture
@@ -54,7 +62,7 @@ they can trust.
 ├── AGENTS.md ← this file: the schema
 ├── raw/ ← immutable source documents (your read-only layer)
 │ └── notes/ ← user-asserted facts captured via /note
-└── wiki/ ← the wiki you own and maintain
+└── wiki/ ← agent-maintained, user-driven (edits via workflows, not by hand)
  ├── index.md ← content catalog
  ├── log.md ← chronological history
  └── decisions/ ← user-set targets/decisions via /decide (living pages)
@@ -65,10 +73,14 @@ they can trust.
  the web via `/research`, or you write user assertions into `raw/notes/`
  via `/note`. Once written, raw files are append-only — never edit, never
  delete.
-- **`wiki/`** is **yours**. You create pages, update pages, maintain
- cross-references, keep summaries current. Every wiki page must be
- traceable to either a `raw/` source or, for `wiki/decisions/` pages, to
- an explicit user `/decide` action.
+- **`wiki/`** is **agent-maintained, user-driven**. You (the agent) do
+ the writing — creating pages, updating them, maintaining cross-references,
+ keeping summaries current — but every change is initiated by the user
+ through a workflow (§4) or its natural-language equivalent. The user
+ should not hand-edit wiki pages; doing so bypasses `log.md`, `index.md`,
+ and the derived catalogs. Every wiki page must be traceable to either a
+ `raw/` source, an explicit user `/decide` action (for `wiki/decisions/`
+ pages), or the charter dialog (for `wiki/charter.md`).
 - **`AGENTS.md`** (this file) is the **co-evolving schema**. If you and the
  user repeatedly hit a workflow problem, propose an edit to this file.
 
@@ -582,19 +594,25 @@ it, the wiki has no subject. Help the user complete the specialization
 in this order; do **not** start `/research`, `/ingest`, or other
 substantive workflows until at least step 1 is done.
 
-1. **Write [`wiki/charter.md`](wiki/charter.md).** This is the
- *purpose* of this wiki — why the endeavor exists, what goal it
- serves, what's in and out of scope. The template ships with a
- placeholder; replace it. A good charter is 1 paragraph of TLDR
- plus three short lists: *what this wiki is for*, *what this wiki
- is not for*, and *revisit triggers* (events that should cause a
- charter rewrite).
-2. **Optionally write `wiki/decisions/mission.md`.** Use this when
- the endeavor has a distinct *subject* whose identity needs its
- own anchor page — a business being founded, a product being
- designed, a hypothesis being tested. Skip it when the endeavor
- is purely investigative (a research project, a literature
- review) and the charter is enough.
+1. **Fill in [`wiki/charter.md`](wiki/charter.md) together.** This is
+ the *purpose* of this wiki — why the endeavor exists, what goal it
+ serves, what's in and out of scope. The user is the source of the
+ substance; you (the agent) write the file (same shape as `/decide`).
+ The expected flow is a short back-and-forth: you ask targeted
+ questions, the user answers in chat, you draft the page, the user
+ confirms. The template ships with a placeholder; replace it. A good
+ charter is 1 paragraph of TLDR plus three short lists: *what this
+ wiki is for*, *what this wiki is not for*, and *revisit triggers*
+ (events that should cause a charter rewrite). Log the result as a
+ `meta` entry in `wiki/log.md`.
+2. **Optionally fill in `wiki/decisions/mission.md` together.** Same
+ collaborative flow as the charter (and structurally a `/decide`,
+ since it lives in `decisions/`). Use this when the endeavor has a
+ distinct *subject* whose identity needs its own anchor page — a
+ business being founded, a product being designed, a hypothesis
+ being tested. Skip it when the endeavor is purely investigative
+ (a research project, a literature review) and the charter is
+ enough.
 3. **Let pages grow organically.** Do **not** pre-create entity or
  concept pages just because they "might be useful". Empty
  placeholder pages are clutter. Each entity / concept page
@@ -631,6 +649,12 @@ The §7 themes list, if added in step 4, should stay.
  `status: abandoned` and `supersedes` links instead.
 7. **Idempotency.** Re-running `/ingest` on the same raw file must not
  duplicate content.
+8. **All `wiki/` writes flow through a workflow.** Do not edit `wiki/`
+ outside of a §4 workflow (or its natural-language equivalent). If
+ the user asks for a wiki change in chat, identify the matching
+ workflow and run it so `log.md`, `index.md`, and the derived
+ catalogs stay coherent. If you detect that the user has hand-edited
+ a wiki page, surface it and offer to log it as a `meta` entry.
 
 ---
 
