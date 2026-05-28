@@ -1,0 +1,117 @@
+# think-tank-wiki
+
+A reusable **LLM Wiki template** for working out anything that benefits from
+a persistent, citation-tracked knowledge base: business plans, research
+projects, technical investigations, life decisions, market analyses,
+literature reviews, etc.
+
+You clone this template, write a one-page [`wiki/charter.md`](wiki/charter.md)
+saying what *this* instance of the wiki is for, and from then on an LLM
+agent maintains the knowledge base for you — disciplined about citations,
+contradictions, and accumulated state — instead of re-deriving everything
+from raw documents on each query.
+
+This follows [Andrej Karpathy's LLM Wiki pattern][gist].
+
+The authoritative configuration is [`AGENTS.md`](AGENTS.md) — read that
+before doing anything substantive with the wiki. The agent reads it at
+the start of every session.
+
+[gist]: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+
+## Three-layer architecture
+
+```
+<your-repo>/
+├── AGENTS.md     ← the schema the agent follows (start here)
+├── raw/          ← immutable source documents
+│   └── notes/    ← user-asserted facts via /note
+└── wiki/         ← LLM-owned, interlinked markdown
+    ├── charter.md ← purpose of this wiki (you write this)
+    ├── index.md  ← content catalog
+    ├── log.md    ← chronological history
+    └── decisions/ ← user-set targets/decisions via /decide
+```
+
+- `raw/` is the **source of truth**. Immutable. The agent reads from it,
+  never modifies it. Files arrive there in three ways: you drop them in,
+  the agent fetches them via `/research`, or the agent writes user
+  assertions there via `/note`.
+- `wiki/` is **agent-owned**. It compiles, cross-references, and
+  maintains the knowledge derived from `raw/`. You read it; the agent
+  writes it.
+- `AGENTS.md` is the **schema** — what makes the agent a disciplined wiki
+  maintainer instead of a generic chatbot.
+
+## Workflows
+
+Invoke from your LLM coding environment (Cursor, Claude Code, etc.) by
+name, or describe the intent in natural language and the agent will
+confirm before acting.
+
+| Command | What it does |
+| --- | --- |
+| `/ingest <path-in-raw/>` | Integrate one raw source into the wiki, updating relevant entity/concept pages, `index.md`, and `log.md`. Idempotent. |
+| `/query <question>` | Answer from the wiki, with citations. If coverage is thin, the agent will refuse to improvise and propose `/research`, `/note`, or `/decide`. Good answers can be filed back as `wiki/synthesis/<slug>.md`. |
+| `/research <topic>` | Cold-start / gap-filling. The agent searches the web, presents ranked candidate sources, you approve, it saves to `raw/<YYYY-MM-DD>-<slug>.md` with provenance, then `/ingest`s each. Ends by answering the original question if there was one. |
+| `/note <fact>` | Capture an empirical fact you already know. Saved to `raw/notes/`, then ingested. Future citations read `[fact, per user]`. |
+| `/decide <decision-or-target>` | Capture a decision/target/constraint (e.g. *"scope: EU only in year 1"*). Saved as a living page in `wiki/decisions/`. Used as a constraint in subsequent `/query` answers. |
+| `/braindump <free-text>` | Capture a mixed dump of facts + targets + URLs + open questions in one pass. The agent decomposes it into `/note`, `/decide`, and `/research` candidates and waits for your confirmation before filing. |
+| `/lint` | Periodic health check: contradictions, stale claims, orphan pages, unsupported facts, gaps. Produces a report and regenerates the `[[open-questions]]` and `[[todos]]` catalogs. Never auto-fixes content pages. |
+
+If you just state a fact or set a target in plain chat, the agent will
+ask whether to file it as `/note` or `/decide` — so nothing valuable
+leaks into chat history.
+
+## First session
+
+The template ships **empty by design** — placeholder charter, empty
+index, empty log, empty content directories. To start using it:
+
+1. **Skim [`AGENTS.md`](AGENTS.md)** so you know how the agent is
+   supposed to behave. Push back if anything feels wrong; the schema
+   is meant to co-evolve with you.
+2. **Write [`wiki/charter.md`](wiki/charter.md).** This is the *one*
+   piece of specialization that turns the template into your wiki.
+   It should answer: what is this wiki for? What's in scope, what's
+   not, and what would cause you to revisit the charter? See
+   `AGENTS.md` §7 for the exact contract.
+3. **Optionally write `wiki/decisions/mission.md`.** Use this when the
+   endeavor has a distinct *subject* whose identity needs its own
+   anchor (a business being founded, a product being designed, a
+   hypothesis being tested). Skip it for purely investigative
+   projects.
+4. **Open this repo in Obsidian as a vault.** Open the *whole repo*
+   (not just `wiki/`) so links from wiki pages into `raw/` resolve.
+   See "Browsing in Obsidian" below.
+5. **Start a session in your LLM coding tool.** A natural first move
+   is `/decide` (capturing your initial assumptions and constraints)
+   followed by `/research` (mapping the landscape).
+
+## Browsing the wiki in Obsidian
+
+Open the **whole repo as your Obsidian vault** (not just `wiki/`).
+That way:
+
+- `[[wiki-link]]` cross-links between wiki pages resolve.
+- Citations like `[label](raw/notes/foo.md)` from wiki pages into raw
+  sources also resolve — one click takes you from a synthesis page to
+  the underlying note or article.
+- The graph view, backlinks panel, and search work out of the box.
+- The [Dataview](https://github.com/blacksmithgu/obsidian-dataview)
+  plugin can run queries over wiki frontmatter (e.g. *"all decisions
+  with status: committed"*) — optional but useful.
+
+Personal Obsidian workspace state is gitignored via `.gitignore`.
+
+## Customizing the schema
+
+`AGENTS.md` is meant to **co-evolve** with how you actually use the
+wiki. If you and the agent repeatedly hit the same workflow problem,
+edit the schema. Specifically, after ~5–10 ingests you'll have a feel
+for the recurring page themes in your endeavor — add a short list of
+them under §7 of `AGENTS.md` so future sessions have a domain hint.
+
+If you maintain multiple wiki instances from this template, periodically
+diff their `AGENTS.md` files to backport improvements. Schema fixes
+made in one instance are usually relevant to the others.

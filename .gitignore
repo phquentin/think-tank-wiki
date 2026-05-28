@@ -1,0 +1,19 @@
+# Obsidian: personal vault state (layout, plugins, themes, hotkeys).
+# Ignore the whole .obsidian/ directory for now; if we ever want to share
+# specific Obsidian config across machines, un-ignore individual files
+# (e.g. .obsidian/app.json) explicitly.
+.obsidian/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Python / tooling caches (in case scripts get added later)
+__pycache__/
+*.pyc
+.venv/
+node_modules/
