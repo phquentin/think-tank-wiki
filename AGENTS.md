@@ -70,6 +70,7 @@ sync the catalogs and append a `meta` log entry.
 ```
 <repo>/
 ├── AGENTS.md ← this file: the schema
+├── CLAUDE.md ← thin pointer that imports AGENTS.md (for Claude Code)
 ├── raw/ ← immutable source documents (your read-only layer)
 │ └── notes/ ← user-asserted facts captured via /note
 └── wiki/ ← agent-maintained, user-driven (edits via workflows, not by hand)
