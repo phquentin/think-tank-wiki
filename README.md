@@ -29,6 +29,7 @@ the start of every session.
 ```
 <your-repo>/
 ├── AGENTS.md     ← the schema the agent follows (start here)
+├── CLAUDE.md     ← thin pointer that imports AGENTS.md (for Claude Code)
 ├── raw/          ← immutable source documents
 │   └── notes/    ← user-asserted facts via /note
 └── wiki/         ← agent-maintained, user-driven (edits via workflows, not by hand)
@@ -48,7 +49,10 @@ the start of every session.
   workflow (or its natural-language equivalent). You read it; you don't
   hand-edit it.
 - `AGENTS.md` is the **schema** — what makes the agent a disciplined wiki
-  maintainer instead of a generic chatbot.
+  maintainer instead of a generic chatbot. It is the single source of truth.
+  Cursor reads it directly; Claude Code reads it via `CLAUDE.md`, a thin
+  pointer that does nothing but `@`-import `AGENTS.md`. Don't put schema
+  content in `CLAUDE.md` — keep it in `AGENTS.md` so the two never drift.
 
 ## Workflows
 
