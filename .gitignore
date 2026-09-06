@@ -1,7 +1,10 @@
+# Sensitive or copyrighted originals: personal records, paywalled full texts,
+# anything that must not reach the remote. Readable by the agent locally; the
+# digest in wiki/sources/ is the durable artifact. Keep the folder itself.
+raw/private/*
+!raw/private/.gitkeep
+
 # Obsidian: personal vault state (layout, plugins, themes, hotkeys).
-# Ignore the whole .obsidian/ directory for now; if we ever want to share
-# specific Obsidian config across machines, un-ignore individual files
-# (e.g. .obsidian/app.json) explicitly.
 .obsidian/
 
 # OS / editor cruft
@@ -12,7 +15,7 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Python / tooling caches (in case scripts get added later)
+# Tooling caches
 __pycache__/
 *.pyc
 .venv/
