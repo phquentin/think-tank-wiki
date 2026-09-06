@@ -89,6 +89,20 @@ content directories.
 4. **Start working.** A few `/note`s or a `/braindump` of what you already
    know, then `/research` to map the landscape, is the usual on-ramp.
 
+## Local tools
+
+Two optional command-line tools widen what `/research` can ingest. The
+agent checks for them and tells you the install command when one is
+missing.
+
+| Tool | Enables | Install |
+| --- | --- | --- |
+| [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) | YouTube videos and podcasts, via their caption track | `winget install yt-dlp` / `brew install yt-dlp` / `pip install yt-dlp` |
+| `pdftotext` (poppler) | PDFs converted to greppable markdown | `winget install poppler` / `brew install poppler` / `apt install poppler-utils` |
+
+Both are pre-allowed in `.claude/settings.json` so they run without a
+prompt.
+
 ## Browsing in Obsidian
 
 With the repo root as the vault, `[[wiki-links]]` resolve, citations into

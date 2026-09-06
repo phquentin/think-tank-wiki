@@ -294,6 +294,23 @@ results out of confident `[fact]` claims; name the open-access lead
 and track the gap with the `[TODO: obtain full text ...]` marker. A fetch
 failure is evidence about the server, not about the licence.
 
+**Non-text sources.** Some sources need a local tool; check it is installed
+before promising, and tell the user the install command if it is not.
+
+- **Videos and podcasts** (`kind: video-transcript`): fetching a watch page
+  returns nothing useful. Pull the caption track with `yt-dlp`:
+  `yt-dlp --skip-download --write-subs --write-auto-subs --sub-langs "en,de"
+  --sub-format vtt -o "<slug>" <url>`, then flatten the VTT to timestamped
+  text. The raw file's header records channel, publish date, runtime,
+  language, and **whether the captions are human-made or auto-generated
+  (ASR)**. ASR mangles names, numbers, and technical terms; keep a short
+  corrections table in the raw file and cite claims by timestamp
+  `[hh:mm:ss]`. A video that *presents* a paper or study is a `secondary`
+  source: fetch the primary and ingest that; keep the video for what it
+  claims beyond the primary and for how it was sold.
+- **PDFs**: `pdftotext -layout` into a markdown file (§2); for copyrighted
+  full texts the markdown goes in `raw/private/` too.
+
 ### 4.4 `/note <assertion>`
 
 1. Ask for `confidence` if not obvious, and optional `provenance`.

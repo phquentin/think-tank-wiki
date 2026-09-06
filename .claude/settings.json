@@ -10,7 +10,10 @@
       "Bash(git log*)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(mkdir *)"
+      "Bash(mkdir *)",
+      "Bash(yt-dlp *)",
+      "Bash(pdftotext *)",
+      "Bash(pdfinfo *)"
     ]
   }
 }
