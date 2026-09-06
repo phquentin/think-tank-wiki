@@ -1,0 +1,691 @@
+<title>Think-Tank Wiki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #EEF1EE;
+    --panel: #FBFCFA;
+    --ink: #1B2422;
+    --muted: #5B6966;
+    --line: #C6CFCA;
+    --raw: #62727A;   --raw-fill: #E0E6E8;
+    --wiki: #237A67;  --wiki-fill: #D9EEE6;
+    --you: #A9660E;   --you-fill: #F6E7CB;
+    --agent: #2C3E5E; --agent-fill: #DFE5EF;
+    --dim: .2;
+    --mark-fact: #237A67;
+    --mark-inf: #2C3E5E;
+    --mark-dec: #A9660E;
+    --mark-oq: #8A4B6B;
+    --shadow: 0 1px 2px rgba(20,30,28,.08), 0 8px 24px rgba(20,30,28,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131817;
+      --panel: #1B2221;
+      --ink: #E3E9E6;
+      --muted: #93A19C;
+      --line: #313D3A;
+      --raw: #9FADB2;  --raw-fill: #242D30;
+      --wiki: #5FC2A9; --wiki-fill: #1B332D;
+      --you: #E3AA4E;  --you-fill: #362B15;
+      --agent: #A7BDE0;--agent-fill: #212E3F;
+      --dim: .22;
+      --mark-fact: #5FC2A9;
+      --mark-inf: #A7BDE0;
+      --mark-dec: #E3AA4E;
+      --mark-oq: #D390B3;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131817;
+    --panel: #1B2221;
+    --ink: #E3E9E6;
+    --muted: #93A19C;
+    --line: #313D3A;
+    --raw: #9FADB2;  --raw-fill: #242D30;
+    --wiki: #5FC2A9; --wiki-fill: #1B332D;
+    --you: #E3AA4E;  --you-fill: #362B15;
+    --agent: #A7BDE0;--agent-fill: #212E3F;
+    --dim: .22;
+    --mark-fact: #5FC2A9;
+    --mark-inf: #A7BDE0;
+    --mark-dec: #E3AA4E;
+    --mark-oq: #D390B3;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .mono { font-family: "IBM Plex Mono", Consolas, "Courier New", monospace; }
+
+  /* The stage: a fixed 16:9 frame scaled to the viewport. All sizes inside use cqi. */
+  .stage {
+    width: min(100vw, calc(100vh * 16 / 9));
+    aspect-ratio: 16 / 9;
+    container-type: inline-size;
+    position: relative;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    outline: none;
+  }
+  .frame {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: 37fr 63fr;
+    grid-template-rows: 1fr auto;
+    gap: 0 3cqi;
+    padding: 4.5cqi 4.5cqi 2.6cqi 4.5cqi;
+  }
+
+  /* Text column */
+  .text { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; min-width: 0; }
+  .scene { display: flex; flex-direction: column; gap: 1.4cqi; height: 100%; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", Consolas, monospace;
+    font-size: .95cqi; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .eyebrow b { color: var(--wiki); font-weight: 500; }
+  h1, h2 {
+    font-family: "IBM Plex Sans Condensed", "IBM Plex Sans", "Arial Narrow", sans-serif;
+    font-weight: 700; line-height: 1.05; margin: 0; text-wrap: balance;
+    letter-spacing: -.01em;
+  }
+  h1 { font-size: 4.1cqi; }
+  h2 { font-size: 3.2cqi; }
+  .lede { font-size: 1.4cqi; line-height: 1.45; margin: 0; max-width: 34ch; color: var(--ink); }
+  .points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .9cqi; }
+  .points li {
+    font-size: 1.25cqi; line-height: 1.4; padding-left: 1.6cqi; position: relative; max-width: 40ch;
+  }
+  .points li::before {
+    content: ""; position: absolute; left: 0; top: .55cqi; width: .7cqi; height: .7cqi;
+    border-radius: 50%; background: var(--muted);
+  }
+  .points li.you::before { background: var(--you); }
+  .points li.agent::before { background: var(--agent); }
+  .points li.raw::before { background: var(--raw); }
+  .points li.wiki::before { background: var(--wiki); }
+  .points code, .lede code, .rule code {
+    font-family: "IBM Plex Mono", Consolas, monospace; font-size: .92em;
+    background: color-mix(in srgb, var(--ink) 7%, transparent);
+    padding: .05em .35em; border-radius: .25em;
+  }
+  .rule {
+    margin-top: auto;
+    border-left: .3cqi solid var(--you);
+    padding: .6cqi 0 .6cqi 1.2cqi;
+    font-size: 1.15cqi; line-height: 1.4; color: var(--ink); max-width: 40ch;
+  }
+  .rule strong { color: var(--you); font-weight: 500; }
+  .hint { margin-top: auto; font-size: 1cqi; color: var(--muted); }
+  .hint kbd {
+    font-family: "IBM Plex Mono", Consolas, monospace; font-size: .9em;
+    border: 1px solid var(--line); border-bottom-width: 2px; border-radius: .3em; padding: 0 .4em;
+  }
+
+  /* Visual column */
+  .visual { grid-column: 2; grid-row: 1; min-width: 0; display: flex; align-items: center; justify-content: center; }
+  .visual > * { width: 100%; }
+  svg { display: block; max-width: 100%; height: auto; overflow: visible; }
+  svg text { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; fill: var(--ink); }
+  svg text.m { font-family: "IBM Plex Mono", Consolas, monospace; }
+  svg text.small { fill: var(--muted); }
+
+  /* Map nodes */
+  .node rect { stroke-width: 1.5; }
+  .n-you rect   { fill: var(--you-fill);   stroke: var(--you); }
+  .n-agent rect { fill: var(--agent-fill); stroke: var(--agent); }
+  .n-schema rect{ fill: var(--panel);      stroke: var(--ink); stroke-dasharray: 4 3; }
+  .n-raw rect   { fill: var(--raw-fill);   stroke: var(--raw); }
+  .n-wiki rect  { fill: var(--wiki-fill);  stroke: var(--wiki); }
+  .n-you .title   { fill: var(--you); }
+  .n-agent .title { fill: var(--agent); }
+  .n-raw .title   { fill: var(--raw); }
+  .n-wiki .title  { fill: var(--wiki); }
+  .n-wiki .sub2 rect { fill: transparent; stroke: var(--wiki); stroke-dasharray: 3 3; stroke-width: 1; }
+
+  /* Arrows */
+  .arrow line, .arrow path { fill: none; stroke-width: 1.8; }
+  .arrow.c-you  line, .arrow.c-you  path { stroke: var(--you); }
+  .arrow.c-agent line, .arrow.c-agent path { stroke: var(--agent); }
+  .arrow.c-wiki line, .arrow.c-wiki path { stroke: var(--wiki); }
+  .arrow.c-ink  line, .arrow.c-ink  path { stroke: var(--ink); }
+  .arrow text { font-size: 12px; }
+  .arrow.c-you  text { fill: var(--you); }
+  .arrow.c-agent text { fill: var(--agent); }
+  .arrow.c-wiki text { fill: var(--wiki); }
+  .mk-you { fill: var(--you); } .mk-agent { fill: var(--agent); } .mk-wiki { fill: var(--wiki); } .mk-ink { fill: var(--ink); }
+
+  /* Per-scene focus: everything is lit unless the scene dims it. */
+  .dimmable { transition: opacity .35s ease; }
+  .only { opacity: 0; transition: opacity .35s ease; }
+  .stage[data-scene="0"] .arrow { opacity: .55; }
+  .stage[data-scene="1"] :is(.n-you, .n-agent, .a-ask, .a-answer, .a-drop, .a-fetch, .a-write, .a-read) { opacity: var(--dim); }
+  .stage[data-scene="1"] .only.s1 { opacity: 1; }
+  .stage[data-scene="2"] :is(.n-schema, .n-raw, .n-wiki, .a-schema, .a-drop, .a-fetch, .a-write, .a-read, .a-ingest) { opacity: var(--dim); }
+  .stage[data-scene="2"] .only.s2 { opacity: 1; }
+  .stage[data-scene="3"] :is(.n-schema, .n-wiki, .a-schema, .a-ask, .a-answer, .a-write, .a-read, .a-ingest) { opacity: var(--dim); }
+  .stage[data-scene="3"] .only.s3 { opacity: 1; }
+  .stage[data-scene="4"] :is(.n-schema, .n-you, .a-schema, .a-ask, .a-answer, .a-drop, .a-fetch, .a-read) { opacity: var(--dim); }
+  .stage[data-scene="4"] .only.s4 { opacity: 1; }
+  .stage[data-scene="6"] :is(.n-schema, .n-raw, .a-schema, .a-drop, .a-fetch, .a-write, .a-ingest) { opacity: var(--dim); }
+  .stage[data-scene="6"] .only.s6 { opacity: 1; }
+  .stage[data-scene="8"] :is(.n-schema, .n-you, .n-raw, .a-schema, .a-ask, .a-answer, .a-drop, .a-fetch, .a-ingest, .a-read) { opacity: var(--dim); }
+  .stage[data-scene="8"] .n-wiki .sub1 { opacity: var(--dim); }
+  .stage[data-scene="8"] .only.s7 { opacity: 1; }
+
+  /* Synthesis scene */
+  .synth .card rect.bg { fill: var(--panel); stroke: var(--wiki); stroke-width: 1.5; }
+  .synth .card text.t { font-family: "IBM Plex Mono", Consolas, monospace; font-size: 12px; font-weight: 500; fill: var(--wiki); }
+  .synth .card text.tag { font-size: 11px; fill: var(--muted); font-style: italic; }
+  .synth .card text.body { font-size: 12px; }
+  .synth .card text.mk { font-family: "IBM Plex Mono", Consolas, monospace; font-size: 11px; font-weight: 500; }
+  .synth .src rect { fill: var(--wiki-fill); stroke: var(--wiki); stroke-width: 1; }
+  .synth .src.dec rect { fill: var(--you-fill); stroke: var(--you); }
+  .synth .src text { font-family: "IBM Plex Mono", Consolas, monospace; font-size: 11.5px; fill: var(--ink); }
+  .synth .flow { fill: none; stroke: var(--wiki); stroke-width: 1.6; }
+  .synth .flow.you { stroke: var(--agent); }
+  .synth text.lbl { font-size: 11.5px; fill: var(--muted); }
+
+  /* Mock page */
+  .page {
+    background: var(--bg); border: 1px solid var(--line); border-radius: .6cqi;
+    padding: 1.6cqi 2cqi; font-family: "IBM Plex Mono", Consolas, monospace;
+    font-size: 1.12cqi; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere;
+    color: var(--ink); margin: 0;
+  }
+  .page .fm { color: var(--muted); }
+  .page .h { color: var(--ink); font-weight: 500; }
+  .page .fact { color: var(--mark-fact); font-weight: 500; }
+  .page .inf  { color: var(--mark-inf);  font-weight: 500; }
+  .page .dec  { color: var(--mark-dec);  font-weight: 500; }
+  .page .oq   { color: var(--mark-oq);   font-weight: 500; }
+  .page .cite { color: var(--muted); }
+  .page .link { color: var(--wiki); }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: .5cqi 1.4cqi; font-size: 1.15cqi; margin: 0; padding: 0; list-style: none; }
+  .legend .k { font-family: "IBM Plex Mono", Consolas, monospace; font-weight: 500; }
+  .legend .fact { color: var(--mark-fact); } .legend .inf { color: var(--mark-inf); }
+  .legend .dec { color: var(--mark-dec); } .legend .oq { color: var(--mark-oq); }
+
+  /* Loop scene */
+  .loop .n circle { fill: var(--panel); stroke-width: 1.8; }
+  .loop .n text { font-size: 13px; font-weight: 500; }
+  .loop .n.you circle { stroke: var(--you); }   .loop .n.you text { fill: var(--you); }
+  .loop .n.agent circle { stroke: var(--agent); } .loop .n.agent text { fill: var(--agent); }
+  .loop .n.raw circle { stroke: var(--raw); }   .loop .n.raw text { fill: var(--raw); }
+  .loop .n.wiki circle { stroke: var(--wiki); } .loop .n.wiki text { fill: var(--wiki); }
+  .loop .ring { fill: none; stroke: var(--line); stroke-width: 1.5; }
+  .loop .step { font-size: 11.5px; fill: var(--muted); }
+  .stats { display: flex; flex-wrap: wrap; gap: 1cqi 2.2cqi; margin: 0; padding: 0; list-style: none; }
+  .stats li { display: flex; flex-direction: column; }
+  .stats .n { font-family: "IBM Plex Sans Condensed", sans-serif; font-weight: 700; font-size: 2.6cqi; line-height: 1; font-variant-numeric: tabular-nums; color: var(--wiki); }
+  .stats .l { font-size: .95cqi; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin-top: .3cqi; }
+  .stats-note { font-size: 1cqi; color: var(--muted); margin: 0; }
+
+  /* Bottom bar */
+  .bar {
+    grid-column: 1 / -1; grid-row: 2;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    padding-top: 1.6cqi; border-top: 1px solid var(--line); margin-top: 1.6cqi;
+    font-size: .95cqi; color: var(--muted);
+  }
+  .bar .brand { font-family: "IBM Plex Mono", Consolas, monospace; letter-spacing: .06em; }
+  .dots { display: flex; gap: .6cqi; justify-content: center; }
+  .dots button {
+    width: 2.4cqi; height: .55cqi; border: 0; border-radius: 1cqi; padding: 0; cursor: pointer;
+    background: var(--line);
+  }
+  .dots button[aria-current="true"] { background: var(--wiki); }
+  .dots button:focus-visible { outline: 2px solid var(--wiki); outline-offset: 2px; }
+  .counter { text-align: right; font-variant-numeric: tabular-nums; }
+  .counter .name { color: var(--ink); }
+
+  /* Edge nav buttons */
+  .nav {
+    position: absolute; top: 0; bottom: 5cqi; width: 8cqi; border: 0; background: transparent;
+    color: var(--muted); font-size: 3cqi; cursor: pointer; opacity: 0; transition: opacity .2s;
+  }
+  .nav:hover, .nav:focus-visible { opacity: 1; outline: none; }
+  .nav.prev { left: 0; } .nav.next { right: 0; }
+  .nav:disabled { cursor: default; opacity: 0 !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dimmable, .only, .nav { transition: none; }
+  }
+
+  @media print {
+    body { overflow: visible; background: #fff; }
+    .stage { box-shadow: none; }
+    .nav { display: none !important; }
+  }
+</style>
+
+<div class="stage" id="stage" data-scene="0" tabindex="0" aria-label="Think-tank wiki tour. Use the arrow keys to move between steps.">
+  <div class="frame">
+    <div class="text" id="text">
+
+      <article class="scene" data-visual="map" data-name="Overview">
+        <div class="eyebrow">Think-tank wiki</div>
+        <h1>A knowledge base the agent writes and you can check.</h1>
+        <p class="lede">Chat answers evaporate, and every new question starts from the raw documents again. This wiki keeps what was learned as linked markdown pages, every claim cited back to its source, so each session starts from the accumulated state.</p>
+        <p class="hint">Press <kbd>→</kbd> to step through · <kbd>F</kbd> for fullscreen · every step is a 16:9 frame, screenshot it for slides</p>
+      </article>
+
+      <article class="scene" data-visual="map" data-name="Three layers" hidden>
+        <div class="eyebrow"><b>1</b> · Three layers</div>
+        <h2>Sources stay untouched. Pages are derived. Rules are written down.</h2>
+        <ul class="points">
+          <li class="raw"><code>raw/</code> is what came in: documents, fetched articles, your notes. The agent reads it and never changes it.</li>
+          <li class="wiki"><code>wiki/</code> is what we know: pages the agent writes from raw, each claim citing back.</li>
+          <li><code>AGENTS.md</code> is how the agent must behave: page format, workflows, hard rules. It reads it at the start of every session.</li>
+        </ul>
+      </article>
+
+      <article class="scene" data-visual="map" data-name="Two roles" hidden>
+        <div class="eyebrow"><b>2</b> · Two roles</div>
+        <h2>You curate. The agent edits.</h2>
+        <ul class="points">
+          <li class="you">You bring sources, state what you know, make decisions, ask questions, and approve what gets fetched.</li>
+          <li class="agent">The agent reads, writes pages, links them, cites every claim, and logs every change.</li>
+        </ul>
+        <p class="rule"><strong>One rule:</strong> you never hand-edit <code>wiki/</code>. Changes go through chat, so the index, the log, and the catalogs stay consistent.</p>
+      </article>
+
+      <article class="scene" data-visual="map" data-name="Getting things in" hidden>
+        <div class="eyebrow"><b>3</b> · Getting things in</div>
+        <h2>Three doors into <code>raw/</code>.</h2>
+        <ul class="points">
+          <li class="you"><strong>Drop a file.</strong> A report, a paper, a scan. Sensitive originals go in a gitignored folder; the digest still gets written.</li>
+          <li class="agent"><strong><code>/research</code>.</strong> The agent searches, shows a ranked list of candidates, you pick, it fetches with provenance.</li>
+          <li class="you"><strong><code>/note</code>.</strong> A fact you know, saved with date and confidence. Later cited as <em>per user</em>, never mistaken for a paper.</li>
+        </ul>
+      </article>
+
+      <article class="scene" data-visual="map" data-name="/ingest" hidden>
+        <div class="eyebrow"><b>4</b> · <code>/ingest</code></div>
+        <h2>One source in. One digest out. The pages it touches updated.</h2>
+        <ul class="points">
+          <li>Read it in full, discuss the takeaways, then write one source page: TLDR, key claims, caveats.</li>
+          <li class="wiki">Update the entity, concept, and hub pages it bears on. At most 10–15 pages per source.</li>
+          <li>Close the open questions it answers. Update the index. Append to the log.</li>
+        </ul>
+        <p class="rule"><strong>Idempotent:</strong> running it twice on the same file changes nothing.</p>
+      </article>
+
+      <article class="scene" data-visual="page" data-name="Inside a page" hidden>
+        <div class="eyebrow"><b>5</b> · Inside a page</div>
+        <h2>Every claim says what it is and where it came from.</h2>
+        <ul class="legend">
+          <li><span class="k fact">[fact]</span> stated by a source, cited</li>
+          <li><span class="k inf">[inference]</span> the agent's synthesis, says what it rests on</li>
+          <li><span class="k dec">[decision]</span> a constraint you set</li>
+          <li><span class="k oq">[open-question]</span> unknown, with the action that closes it</li>
+        </ul>
+        <p class="rule"><strong>Disagreements are kept visible.</strong> Sources that conflict get a Contradictions section. The wiki's own mistakes are corrected in place under a dated note, never silently rewritten.</p>
+      </article>
+
+      <article class="scene" data-visual="map" data-name="/query" hidden>
+        <div class="eyebrow"><b>6</b> · <code>/query</code></div>
+        <h2>Answers come from the wiki, with citations, or not at all.</h2>
+        <ul class="points">
+          <li class="agent">Reads the index, then the relevant pages, and answers with links to pages and raw files.</li>
+          <li>If the wiki is thin on the topic, it says so and proposes <code>/research</code>, <code>/note</code>, or <code>/decide</code> instead of improvising.</li>
+          <li class="you">Your decisions filter the recommendations. Reusable answers are filed back as synthesis pages, the next step.</li>
+        </ul>
+      </article>
+
+      <article class="scene" data-visual="synth" data-name="Synthesis" hidden>
+        <div class="eyebrow"><b>7</b> · Synthesis</div>
+        <h2>Where it comes together, and what you actually read.</h2>
+        <ul class="points">
+          <li class="wiki"><strong>Answer pages.</strong> A <code>/query</code> or <code>/research</code> conclusion filed back, every claim linking to the pages and sources it rests on. Written once, cited from then on.</li>
+          <li class="wiki"><strong>Hub pages.</strong> Living trackers: a timeline, an inventory of what was tried, a record of what was checked. Every ingest that touches them updates them.</li>
+        </ul>
+        <p class="rule"><strong>Entities and concepts hold the facts. Synthesis holds the argument.</strong> Nobody re-reads 180 sources to find out where things stand.</p>
+      </article>
+
+      <article class="scene" data-visual="map" data-name="Bookkeeping" hidden>
+        <div class="eyebrow"><b>8</b> · Bookkeeping</div>
+        <h2>An index, a log, and two catalogs keep it navigable.</h2>
+        <ul class="points">
+          <li class="wiki"><code>index.md</code>: one line per page, read first on every question.</li>
+          <li class="wiki"><code>log.md</code>: append-only. <code>## [2026-08-25] ingest | eight folate sources</code></li>
+          <li><code>/lint</code>: a health check for contradictions, orphans, and unsourced claims. It regenerates <code>open-questions.md</code> and <code>todos.md</code> from the markers on the pages.</li>
+        </ul>
+      </article>
+
+      <article class="scene" data-visual="loop" data-name="It compounds" hidden>
+        <div class="eyebrow"><b>9</b> · It compounds</div>
+        <h2>Each answer leaves the wiki better than it found it.</h2>
+        <p class="lede">A question exposes a gap, research fills it, the ingest links it to what was already there, and the answer raises the next question. Nothing is re-derived.</p>
+        <ul class="stats" aria-label="One instance after three months">
+          <li><span class="n">45</span><span class="l">sessions</span></li>
+          <li><span class="n">290</span><span class="l">pages</span></li>
+          <li><span class="n">182</span><span class="l">sources</span></li>
+          <li><span class="n">2,900</span><span class="l">cited facts</span></li>
+          <li><span class="n">350</span><span class="l">open questions</span></li>
+        </ul>
+        <p class="stats-note">One instance, three months in.</p>
+      </article>
+
+    </div>
+
+    <div class="visual" id="visual">
+
+      <!-- The shared architecture map -->
+      <figure id="map" style="margin:0">
+        <svg viewBox="0 0 900 540" role="img" aria-label="Map of the wiki: you and the agent exchange questions and answers; the agent reads the schema, fetches into raw, ingests raw into wiki, and reads wiki to answer.">
+          <defs>
+            <marker id="mk-you" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-you" d="M0 0L10 5L0 10z"/></marker>
+            <marker id="mk-agent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-agent" d="M0 0L10 5L0 10z"/></marker>
+            <marker id="mk-wiki" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-wiki" d="M0 0L10 5L0 10z"/></marker>
+            <marker id="mk-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-ink" d="M0 0L10 5L0 10z"/></marker>
+          </defs>
+
+          <!-- Schema -->
+          <g class="node n-schema dimmable">
+            <rect x="320" y="18" width="260" height="56" rx="6"/>
+            <text class="m" x="450" y="42" text-anchor="middle" font-size="14" font-weight="500">AGENTS.md</text>
+            <text class="small" x="450" y="61" text-anchor="middle" font-size="11.5">the rules the agent follows</text>
+          </g>
+
+          <!-- You -->
+          <g class="node n-you dimmable">
+            <rect x="20" y="170" width="170" height="120" rx="8"/>
+            <text class="title" x="105" y="220" text-anchor="middle" font-size="24" font-weight="700" font-family="IBM Plex Sans Condensed, IBM Plex Sans, sans-serif">You</text>
+            <text class="small" x="105" y="246" text-anchor="middle" font-size="12">curator</text>
+          </g>
+
+          <!-- Agent -->
+          <g class="node n-agent dimmable">
+            <rect x="340" y="170" width="220" height="120" rx="8"/>
+            <text class="title" x="450" y="220" text-anchor="middle" font-size="24" font-weight="700" font-family="IBM Plex Sans Condensed, IBM Plex Sans, sans-serif">Agent</text>
+            <text class="small" x="450" y="246" text-anchor="middle" font-size="12">editor: reads, writes, cites, logs</text>
+          </g>
+
+          <!-- raw/ -->
+          <g class="node n-raw dimmable">
+            <rect x="60" y="380" width="330" height="140" rx="8"/>
+            <text class="m title" x="80" y="410" font-size="18" font-weight="500">raw/</text>
+            <text class="small" x="80" y="436" font-size="12">documents · fetched articles</text>
+            <text class="m small" x="80" y="456" font-size="12">notes/   private/</text>
+            <text class="small" x="80" y="498" font-size="11.5" font-style="italic">immutable · read-only for the agent</text>
+          </g>
+
+          <!-- wiki/ -->
+          <g class="node n-wiki dimmable">
+            <rect x="510" y="380" width="370" height="140" rx="8"/>
+            <text class="m title" x="530" y="410" font-size="18" font-weight="500">wiki/</text>
+            <g class="sub1 dimmable">
+              <text class="m small" x="530" y="436" font-size="12">sources  entities  concepts</text>
+              <text class="m small" x="530" y="454" font-size="12">synthesis  decisions</text>
+            </g>
+            <g class="sub2">
+              <text class="m small" x="530" y="480" font-size="12">index  log  open-questions  todos</text>
+            </g>
+            <text class="small" x="530" y="504" font-size="11.5" font-style="italic">written by the agent · every claim cited</text>
+          </g>
+
+          <!-- Arrows -->
+          <g class="arrow a-schema c-ink dimmable">
+            <line x1="450" y1="74" x2="450" y2="168" marker-end="url(#mk-ink)"/>
+            <text class="small" x="460" y="124" font-size="11.5">reads every session</text>
+          </g>
+
+          <g class="arrow a-ask c-you dimmable">
+            <line x1="190" y1="206" x2="338" y2="206" marker-end="url(#mk-you)"/>
+            <text x="264" y="196" text-anchor="middle">asks · decides · approves</text>
+          </g>
+
+          <g class="arrow a-answer c-agent dimmable">
+            <line x1="340" y1="256" x2="192" y2="256" marker-end="url(#mk-agent)"/>
+            <text x="264" y="276" text-anchor="middle">answers, with citations</text>
+          </g>
+
+          <g class="arrow a-drop c-you dimmable">
+            <line x1="82" y1="290" x2="112" y2="378" marker-end="url(#mk-you)"/>
+            <text x="76" y="334" text-anchor="end">drops files</text>
+            <text x="76" y="350" text-anchor="end">states facts</text>
+          </g>
+
+          <g class="arrow a-fetch c-agent dimmable">
+            <line x1="410" y1="290" x2="332" y2="378" marker-end="url(#mk-agent)"/>
+            <text x="356" y="334" text-anchor="end">/research fetches</text>
+            <text x="356" y="350" text-anchor="end">/note writes</text>
+          </g>
+
+          <g class="arrow a-write c-agent dimmable">
+            <line x1="480" y1="290" x2="578" y2="378" marker-end="url(#mk-agent)"/>
+            <text x="520" y="338" text-anchor="end">writes pages</text>
+          </g>
+
+          <g class="arrow a-read c-agent dimmable">
+            <line x1="622" y1="380" x2="522" y2="292" marker-end="url(#mk-agent)"/>
+            <text x="588" y="338">reads pages</text>
+          </g>
+
+          <g class="arrow a-ingest c-wiki dimmable">
+            <line x1="392" y1="450" x2="508" y2="450" marker-end="url(#mk-wiki)"/>
+            <text class="m" x="450" y="440" text-anchor="middle" font-weight="500">/ingest</text>
+            <text class="small" x="450" y="468" text-anchor="middle" font-size="11">read, never modified</text>
+          </g>
+
+          <!-- Scene-specific callouts -->
+          <g class="only s1">
+            <text class="small" x="450" y="530" text-anchor="middle" font-size="12">one direction only: raw is never rewritten from wiki</text>
+          </g>
+          <g class="only s2">
+            <line x1="190" y1="290" x2="560" y2="380" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="3 4"/>
+            <text class="small" x="300" y="372" font-size="11.5">hand-edits: never</text>
+          </g>
+          <g class="only s3">
+            <circle cx="62" cy="322" r="9" fill="var(--you)"/><text x="62" y="326" text-anchor="middle" font-size="11" font-weight="500" fill="var(--panel)">1</text>
+            <circle cx="392" cy="322" r="9" fill="var(--agent)"/><text x="392" y="326" text-anchor="middle" font-size="11" font-weight="500" fill="var(--panel)">2</text>
+            <circle cx="392" cy="352" r="9" fill="var(--you)"/><text x="392" y="356" text-anchor="middle" font-size="11" font-weight="500" fill="var(--panel)">3</text>
+            <text class="small" x="450" y="530" text-anchor="middle" font-size="12">nothing is fetched without your approval</text>
+          </g>
+          <g class="only s4">
+            <text class="small" x="450" y="530" text-anchor="middle" font-size="12">one raw file → one source page + updates to the pages it touches</text>
+          </g>
+          <g class="only s6">
+            <text class="m" x="264" y="182" text-anchor="middle" font-size="12" font-weight="500" fill="var(--you)">/query</text>
+            <text class="small" x="450" y="530" text-anchor="middle" font-size="12">thin coverage → stop and propose /research, /note or /decide</text>
+          </g>
+          <g class="only s7">
+            <rect x="522" y="466" width="270" height="20" rx="4" fill="none" stroke="var(--wiki)" stroke-width="1.2"/>
+            <text class="m" x="810" y="480" font-size="12" font-weight="500" fill="var(--wiki)">← /lint</text>
+          </g>
+        </svg>
+      </figure>
+
+      <!-- Scene 5: a page -->
+      <figure id="page" style="margin:0" hidden>
+        <pre class="page" aria-label="Example wiki page showing frontmatter, TLDR, marked claims, and a contradictions section"><span class="fm">---
+title: Pilot-scale cell suppliers
+type: entity
+sources: [raw/2026-05-14-vendor-report.md, raw/notes/2026-05-20-supplier-call.md]
+---</span>
+<span class="h">## TLDR</span>
+Two suppliers can deliver at pilot scale; only one publishes a price.
+
+<span class="fact">[fact]</span> Pilot lots ship in 6–8 weeks <span class="cite">[src](raw/2026-05-14-vendor-report.md)</span>
+<span class="fact">[fact, per user 2026-05-20]</span> Minimum order is 200 cells <span class="cite">[note](raw/notes/2026-05-20-supplier-call.md)</span>
+<span class="inf">[inference]</span> At that lead time a Q3 pilot needs the order placed by mid-June.
+<span class="dec">[decision]</span> The pilot is EU-only → <span class="link">[[decisions/pilot-scope]]</span>
+<span class="oq">[open-question]</span> Does the second supplier price per cell or per pack? → /research
+
+<span class="h">## Contradictions</span>
+The 2024 datasheet lists 4.2 V per cell; the 2026 report lists 4.0 V.
+Both kept; vendor asked. See <span class="link">[[concepts/cell-chemistry]]</span>.</pre>
+      </figure>
+
+      <!-- Scene 7: synthesis -->
+      <figure id="synth" style="margin:0" hidden>
+        <svg class="synth" viewBox="0 0 900 540" role="img" aria-label="Synthesis pages draw on source, entity, concept and decision pages. An answer page files back a conclusion with citations; a hub page is a living tracker. Both are what the reader opens first.">
+          <defs>
+            <marker id="mk-syn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-wiki" d="M0 0L10 5L0 10z"/></marker>
+            <marker id="mk-syn-you" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-agent" d="M0 0L10 5L0 10z"/></marker>
+          </defs>
+
+          <!-- what it draws on -->
+          <text class="lbl" x="40" y="66" font-weight="500">draws on, and cites</text>
+          <g class="src"><rect x="40" y="82" width="200" height="30" rx="5"/><text x="52" y="101">sources/vendor-report</text></g>
+          <g class="src"><rect x="40" y="122" width="200" height="30" rx="5"/><text x="52" y="141">sources/supplier-call</text></g>
+          <g class="src"><rect x="40" y="162" width="200" height="30" rx="5"/><text x="52" y="181">entities/supplier-a</text></g>
+          <g class="src"><rect x="40" y="202" width="200" height="30" rx="5"/><text x="52" y="221">entities/supplier-b</text></g>
+          <g class="src"><rect x="40" y="242" width="200" height="30" rx="5"/><text x="52" y="261">concepts/cell-chemistry</text></g>
+          <g class="src dec"><rect x="40" y="282" width="200" height="30" rx="5"/><text x="52" y="301">decisions/pilot-scope</text></g>
+
+          <path class="flow" d="M 252 97 L 262 97 L 262 297 L 252 297" />
+          <path class="flow" d="M 262 197 L 292 197 L 292 150 L 318 150" marker-end="url(#mk-syn)"/>
+          <path class="flow" d="M 292 197 L 292 390 L 318 390" marker-end="url(#mk-syn)"/>
+
+          <!-- answer card -->
+          <g class="card">
+            <rect class="bg" x="320" y="60" width="310" height="190" rx="8"/>
+            <text class="t" x="336" y="84">synthesis/pilot-supplier-choice</text>
+            <text class="tag" x="336" y="102">answer · filed back from /query · written once</text>
+            <text class="body" x="336" y="128" font-weight="500">TLDR  Supplier A. Order by mid-June for a Q3 pilot.</text>
+            <text class="mk" x="336" y="154" fill="var(--mark-fact)">[fact]</text><text class="body" x="386" y="154">6–8 week lead time  <tspan fill="var(--muted)">[src]</tspan></text>
+            <text class="mk" x="336" y="176" fill="var(--mark-fact)">[fact, per user]</text><text class="body" x="452" y="176">MOQ 200 cells  <tspan fill="var(--muted)">[note]</tspan></text>
+            <text class="mk" x="336" y="198" fill="var(--mark-inf)">[inference]</text><text class="body" x="420" y="198">A fits the budget; B cannot ship in time</text>
+            <text class="mk" x="336" y="220" fill="var(--mark-dec)">[decision]</text><text class="body" x="410" y="220">EU-only → <tspan fill="var(--wiki)">[[decisions/pilot-scope]]</tspan></text>
+          </g>
+
+          <!-- hub card -->
+          <g class="card">
+            <rect class="bg" x="320" y="300" width="310" height="180" rx="8"/>
+            <text class="t" x="336" y="324">synthesis/project-timeline</text>
+            <text class="tag" x="336" y="342">hub · living tracker · updated by every ingest that touches it</text>
+            <text class="body" x="336" y="370"><tspan class="mk" fill="var(--muted)">2026-05-14</tspan>  vendor report ingested</text>
+            <text class="body" x="336" y="392"><tspan class="mk" fill="var(--muted)">2026-05-20</tspan>  call: MOQ 200 cells, 6–8 weeks</text>
+            <text class="body" x="336" y="414"><tspan class="mk" fill="var(--muted)">2026-06-02</tspan>  order placed with supplier A</text>
+            <text class="body" x="336" y="444"><tspan class="mk" fill="var(--mark-oq)">[open-question]</tspan> qualification run date? → /note</text>
+            <text class="body" x="336" y="466"><tspan class="mk" fill="var(--mark-oq)">[TODO]</tspan> add the B quote once it arrives</text>
+          </g>
+
+          <!-- the reader -->
+          <g class="node n-you">
+            <rect x="730" y="220" width="150" height="100" rx="8"/>
+            <text class="title" x="805" y="262" text-anchor="middle" font-size="22" font-weight="700" font-family="IBM Plex Sans Condensed, IBM Plex Sans, sans-serif">You</text>
+            <text class="small" x="805" y="286" text-anchor="middle" font-size="12">open these first</text>
+          </g>
+          <path class="flow you" d="M 632 155 L 690 155 L 690 250 L 728 250" marker-end="url(#mk-syn-you)"/>
+          <path class="flow you" d="M 632 390 L 690 390 L 690 290 L 728 290" marker-end="url(#mk-syn-you)"/>
+          <text class="lbl" x="700" y="143" text-anchor="middle">the argument</text>
+          <text class="lbl" x="700" y="412" text-anchor="middle">the state of things</text>
+
+          <text class="lbl" x="450" y="520" text-anchor="middle" font-size="12">every line links back; the facts live on the pages it draws from</text>
+        </svg>
+      </figure>
+
+      <!-- Scene 9: the loop -->
+      <figure id="loop" style="margin:0" hidden>
+        <svg class="loop" viewBox="0 0 900 540" role="img" aria-label="A loop: a question leads to research, research to raw files, ingest to wiki pages, pages to an answer with citations, and the answer to the next question.">
+          <defs>
+            <marker id="mk-loop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--line)"/></marker>
+          </defs>
+          <!-- ring segments between nodes, radius 190 around (450,270); nodes at 72° steps starting at top -->
+          <path class="ring" d="M 450 80 A 190 190 0 0 1 630.7 211.3" marker-end="url(#mk-loop)"/>
+          <path class="ring" d="M 630.7 211.3 A 190 190 0 0 1 561.7 423.7" marker-end="url(#mk-loop)"/>
+          <path class="ring" d="M 561.7 423.7 A 190 190 0 0 1 338.3 423.7" marker-end="url(#mk-loop)"/>
+          <path class="ring" d="M 338.3 423.7 A 190 190 0 0 1 269.3 211.3" marker-end="url(#mk-loop)"/>
+          <path class="ring" d="M 269.3 211.3 A 190 190 0 0 1 450 80" marker-end="url(#mk-loop)"/>
+
+          <g class="n you"><circle cx="450" cy="80" r="46"/><text x="450" y="76" text-anchor="middle">a question</text><text class="step" x="450" y="93" text-anchor="middle">/query</text></g>
+          <g class="n agent"><circle cx="630.7" cy="211.3" r="46"/><text x="630.7" y="207" text-anchor="middle">research</text><text class="step" x="630.7" y="224" text-anchor="middle">you approve the picks</text></g>
+          <g class="n raw"><circle cx="561.7" cy="423.7" r="46"/><text x="561.7" y="419" text-anchor="middle">raw/</text><text class="step" x="561.7" y="436" text-anchor="middle">saved with provenance</text></g>
+          <g class="n wiki"><circle cx="338.3" cy="423.7" r="46"/><text x="338.3" y="419" text-anchor="middle">wiki/</text><text class="step" x="338.3" y="436" text-anchor="middle">/ingest links it in</text></g>
+          <g class="n agent"><circle cx="269.3" cy="211.3" r="46"/><text x="269.3" y="207" text-anchor="middle">an answer</text><text class="step" x="269.3" y="224" text-anchor="middle">cited, filed back</text></g>
+
+          <text x="450" y="262" text-anchor="middle" font-size="15" font-weight="500">the wiki after each turn</text>
+          <text class="small" x="450" y="284" text-anchor="middle" font-size="12.5">more pages, more links, fewer open questions</text>
+          <text class="small" x="450" y="304" text-anchor="middle" font-size="12.5">and the next question starts from here</text>
+        </svg>
+      </figure>
+
+    </div>
+
+    <div class="bar">
+      <div class="brand">think-tank-wiki</div>
+      <div class="dots" id="dots" role="tablist" aria-label="Steps"></div>
+      <div class="counter" id="counter"></div>
+    </div>
+  </div>
+
+  <button class="nav prev" id="prev" aria-label="Previous step">‹</button>
+  <button class="nav next" id="next" aria-label="Next step">›</button>
+</div>
+
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var scenes = Array.prototype.slice.call(document.querySelectorAll('.scene'));
+  var visuals = { map: document.getElementById('map'), page: document.getElementById('page'), synth: document.getElementById('synth'), loop: document.getElementById('loop') };
+  var dots = document.getElementById('dots');
+  var counter = document.getElementById('counter');
+  var prev = document.getElementById('prev');
+  var next = document.getElementById('next');
+  var current = 0;
+
+  scenes.forEach(function (s, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-label', 'Step ' + i + ': ' + s.dataset.name);
+    b.addEventListener('click', function () { go(i); });
+    dots.appendChild(b);
+  });
+
+  function go(i) {
+    if (i < 0 || i >= scenes.length) return;
+    current = i;
+    scenes.forEach(function (s, k) { s.hidden = k !== i; });
+    var v = scenes[i].dataset.visual;
+    Object.keys(visuals).forEach(function (k) { visuals[k].hidden = k !== v; });
+    stage.dataset.scene = String(i);
+    Array.prototype.forEach.call(dots.children, function (d, k) {
+      d.setAttribute('aria-current', k === i ? 'true' : 'false');
+    });
+    counter.innerHTML = '<span class="name">' + scenes[i].dataset.name + '</span> &nbsp;' + i + ' / ' + (scenes.length - 1);
+    prev.disabled = i === 0;
+    next.disabled = i === scenes.length - 1;
+    try { history.replaceState(null, '', '#' + i); } catch (e) {}
+  }
+
+  prev.addEventListener('click', function () { go(current - 1); });
+  next.addEventListener('click', function () { go(current + 1); });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    switch (e.key) {
+      case 'ArrowRight': case ' ': case 'PageDown': case 'Enter': e.preventDefault(); go(current + 1); break;
+      case 'ArrowLeft': case 'PageUp': case 'Backspace': e.preventDefault(); go(current - 1); break;
+      case 'Home': e.preventDefault(); go(0); break;
+      case 'End': e.preventDefault(); go(scenes.length - 1); break;
+      case 'f': case 'F':
+        if (document.fullscreenElement) { document.exitFullscreen && document.exitFullscreen(); }
+        else if (stage.requestFullscreen) { stage.requestFullscreen(); }
+        break;
+    }
+  });
+
+  var start = 0;
+  try { start = parseInt(location.hash.replace('#', ''), 10) || 0; } catch (e) {}
+  go(Math.min(Math.max(start, 0), scenes.length - 1));
+  stage.focus({ preventScroll: true });
+})();
+</script>

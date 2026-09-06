@@ -103,6 +103,15 @@ missing.
 Both are pre-allowed in `.claude/settings.json` so they run without a
 prompt.
 
+## Explaining it to others
+
+[`docs/tour.html`](docs/tour.html) is a ten-step visual walkthrough of the
+pattern: the three layers, the two roles, how sources get in, what a page
+looks like, how questions are answered, where synthesis fits, and why it
+compounds. Open the file in any browser, step through with the arrow keys,
+press F for fullscreen. It needs no server; every step is a 16:9 frame you
+can screenshot into slides.
+
 ## Browsing in Obsidian
 
 With the repo root as the vault, `[[wiki-links]]` resolve, citations into
