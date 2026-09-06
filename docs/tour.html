@@ -271,6 +271,15 @@
     .stage { box-shadow: none; }
     .nav { display: none !important; }
   }
+
+  /* Print mode (#print): every step laid out as its own 16:9 page. */
+  @page { size: 1280px 720px; margin: 0; }
+  body.print { display: block; height: auto; overflow: visible; background: var(--bg); }
+  body.print .stage { width: 1280px; height: 720px; aspect-ratio: auto; box-shadow: none; break-after: page; margin: 0 auto; }
+  body.print .stage:last-child { break-after: auto; }
+  body.print .nav { display: none; }
+  body.print * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body.print .dimmable, body.print .only { transition: none; }
 </style>
 
 <div class="stage" id="stage" data-scene="0" tabindex="0" aria-label="Think-tank wiki tour. Use the arrow keys to move between steps.">
@@ -371,14 +380,7 @@
         <div class="eyebrow"><b>9</b> · It compounds</div>
         <h2>Each answer leaves the wiki better than it found it.</h2>
         <p class="lede">A question exposes a gap, research fills it, the ingest links it to what was already there, and the answer raises the next question. Nothing is re-derived.</p>
-        <ul class="stats" aria-label="One instance after three months">
-          <li><span class="n">45</span><span class="l">sessions</span></li>
-          <li><span class="n">290</span><span class="l">pages</span></li>
-          <li><span class="n">182</span><span class="l">sources</span></li>
-          <li><span class="n">2,900</span><span class="l">cited facts</span></li>
-          <li><span class="n">350</span><span class="l">open questions</span></li>
-        </ul>
-        <p class="stats-note">One instance, three months in.</p>
+        <p class="rule"><strong>The unit of progress is a page, not a chat.</strong> Every session starts where the last one stopped.</p>
       </article>
 
     </div>
@@ -682,6 +684,42 @@ Both kept; vendor asked. See <span class="link">[[concepts/cell-chemistry]]</spa
         break;
     }
   });
+
+  // Print mode: #print lays every step out as its own page, for Print to PDF.
+  if (location.hash === '#print') {
+    document.body.classList.add('print');
+    var names = scenes.map(function (s) { return s.dataset.name; });
+    scenes.forEach(function (s, i) {
+      var sheet = document.createElement('div');
+      sheet.className = 'stage';
+      sheet.dataset.scene = String(i);
+      var frame = document.createElement('div');
+      frame.className = 'frame';
+      var text = document.createElement('div');
+      text.className = 'text';
+      var article = s.cloneNode(true);
+      article.hidden = false;
+      text.appendChild(article);
+      var vis = document.createElement('div');
+      vis.className = 'visual';
+      var fig = visuals[s.dataset.visual].cloneNode(true);
+      fig.hidden = false;
+      fig.removeAttribute('id');
+      vis.appendChild(fig);
+      var bar = document.createElement('div');
+      bar.className = 'bar';
+      var dotHtml = names.map(function (n, k) {
+        return '<button type="button" tabindex="-1" aria-current="' + (k === i) + '" aria-label="Step ' + k + ': ' + n + '"></button>';
+      }).join('');
+      bar.innerHTML = '<div class="brand">think-tank-wiki</div><div class="dots">' + dotHtml + '</div>' +
+        '<div class="counter"><span class="name">' + names[i] + '</span> &nbsp;' + i + ' / ' + (scenes.length - 1) + '</div>';
+      frame.appendChild(text); frame.appendChild(vis); frame.appendChild(bar);
+      sheet.appendChild(frame);
+      document.body.appendChild(sheet);
+    });
+    stage.remove();
+    return;
+  }
 
   var start = 0;
   try { start = parseInt(location.hash.replace('#', ''), 10) || 0; } catch (e) {}

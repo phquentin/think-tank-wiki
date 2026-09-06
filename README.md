@@ -109,8 +109,9 @@ prompt.
 pattern: the three layers, the two roles, how sources get in, what a page
 looks like, how questions are answered, where synthesis fits, and why it
 compounds. Open the file in any browser, step through with the arrow keys,
-press F for fullscreen. It needs no server; every step is a 16:9 frame you
-can screenshot into slides.
+press F for fullscreen. It needs no server. [`docs/tour.pdf`](docs/tour.pdf)
+is the same deck as ten 16:9 pages for sharing or importing into slides;
+to regenerate it after a change, open `tour.html#print` and print to PDF.
 
 ## Browsing in Obsidian
 
